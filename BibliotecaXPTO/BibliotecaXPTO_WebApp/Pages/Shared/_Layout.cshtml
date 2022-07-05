@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" shrink-to-fit="no" />
+    <title>@ViewData["Title"] - BibliotecaXPTO_WebApp</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar">
+            <div class="p-4 pt-5">
+                @if (IsSectionDefined("MenuAdmin"))
+                {
+                    RenderSection("MenuAdmin");
+                }
+                else if (IsSectionDefined("MenuReader"))
+                {
+                    RenderSection("MenuReader");
+                }
+                @if (IsSectionDefined("FooterAdmin"))
+                {
+                    RenderSection("FooterAdmin");
+                }
+                else
+                {
+                    <div class="footer">
+                        <p class="text-muted">
+                            Biblioteca XPTO | <i>Projeto com fins meramente educativos.</i>
+                        </p>
+                    </div>
+                }
+            </div>
+        </nav>
+
+        <!-- Page Content  -->
+        <div id="content" class="p-4 p-md-5">
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                        <i class="fa fa-bars"></i>
+                        <span class="sr-only">Toggle Menu</span>
+                    </button>
+                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        @if (IsSectionDefined("NavbarAdmin"))
+                        {
+                            RenderSection("NavbarAdmin");
+                        }
+                        else if (IsSectionDefined("NavbarReader"))
+                        {
+                            RenderSection("NavbarReader");
+                        }
+                    </div>
+                </div>
+            </nav>
+            <div>
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/popper.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

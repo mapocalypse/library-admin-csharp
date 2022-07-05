@@ -1,0 +1,11 @@
+﻿Variável Sessão
+	"reader.Id", reader.Id
+	"reader.FirstName", reader.FirstName
+	"reader.LastName", reader.LastName
+	"reader.Email", reader.Email
+	"reader.Status", reader.Status
+	"reader.Admin", reader.Admin
+	"reader_pesquisa", "" //guardar o campo da pesquisa
+	"reader_devolver", "" //guardar o ID do leitor para apresentação no form de devolução (utilizado apenas na pagina Admin)
+
+

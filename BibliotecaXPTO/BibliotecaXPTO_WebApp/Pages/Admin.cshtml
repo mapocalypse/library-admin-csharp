@@ -1,0 +1,727 @@
+﻿@page
+@model BibliotecaXPTO_WebApp.Pages.AdminModel
+
+@{
+    ViewData["Title"] = "Admin";
+}
+
+@section MenuAdmin {
+    <ul class="list-unstyled components mb-5">
+        <li class="active">
+            <a href="Admin?id=0">Pesquisa</a>
+        </li>
+        <li>
+            <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Empréstimos</a>
+            <ul class="collapse list-unstyled" id="homeSubmenu">
+                <li>
+                    <a href="Admin?id=2">Empréstimos Ativos</a>
+                </li>
+                <li>
+                    <a href="Admin?id=3">Status Empréstimos</a>
+                </li>
+                <li>
+                    <a href="Admin?id=4">Histórico Empréstimos</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="#homeSubmenu2" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Gestão Obras</a>
+            <ul class="collapse list-unstyled" id="homeSubmenu2">
+                <li>
+                    <a href="Admin?id=7">Inserir Obras</a>
+                </li>
+                <li>
+                    <a href="Admin?id=8">Atualizar Exemplares</a>
+                </li>
+                <li>
+                    <a href="Admin?id=9">Transferir Exemplares</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="#homeSubmenu3" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Gestão Leitores</a>
+            <ul class="collapse list-unstyled" id="homeSubmenu3">
+                <li>
+                    <a href="Admin?id=11">Suspender Acesso</a>
+                </li>
+                <li>
+                    <a href="Admin?id=12">Reativar Acesso</a>
+                </li>
+                <li>
+                    <a href="Admin?id=13">Eliminar Leitor (Inatividade)</a>
+                </li>
+                <li>
+                    <a href="Admin?id=5">Cancelar Inscrição</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="Admin?id=6">Encerrar Sessão</a>
+        </li>
+    </ul>
+}
+
+@section FooterAdmin {
+    <div class="footer">
+        <p class="text-muted">
+            <a href="Reader">Área Pessoal</a>
+        </p>
+        <p class="text-muted">
+            Biblioteca XPTO | <i>Projeto com fins meramente educativos.</i>
+        </p>
+    </div>
+}
+
+@section NavBarAdmin {
+    <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item active">
+            <a class="nav-link" href="Admin">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="Admin?id=6">Encerrar Sessão</a>
+        </li>
+    </ul>
+}
+
+@if (Model.Prm == 0) /*Pesquisa*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Já sabe o que vai ler hoje?</h1>
+                <h2>Consulte o catálogo da Biblioteca XPTO.</h2>
+                <form class="card card-sm" method="post" asp-page-handler="admin">
+                    <div class="card-body row no-gutters align-items-center">
+                        <div class="col-auto">
+                        </div>
+                        <div class="col">
+                            <input name="book-search" value="@Model.Title" class="form-control form-control-lg form-control-borderless" type="search" placeholder="Pesquisa por título.">
+                        </div>
+                        <div class="col-auto">
+                            <input name="prm_post" type="hidden" value="1" />
+                            <button class="btn btn-lg btn-primary" type="submit">Pesquisar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.IsPost == true && Model.Prm == 1) /*Resultado da Pesquisa*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Já sabe o que vai ler hoje?</h1>
+                <h2>Consulte o catálogo da Biblioteca XPTO.</h2>
+                <form class="card card-sm" method="post" asp-page-handler="admin">
+                    <div class="card-body row no-gutters align-items-center">
+                        <div class="col-auto">
+                        </div>
+                        <div class="col">
+                            <input name="book-search" value="@Model.Title" class="form-control form-control-lg form-control-borderless" type="search" placeholder="Pesquisa por título.">
+                        </div>
+                        <div class="col-auto">
+                            <input name="prm_post" type="hidden" value="1" />
+                            <button class="btn btn-lg btn-primary" type="submit">Pesquisar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @foreach (BibliotecaXPTO_Lib.Book book in Model.Books)
+        {
+            string imageBase64;
+            string imageSrc;
+
+            if (@book.Img as byte[] == null)
+            {
+                imageSrc = "/images/cover-not-available.png";
+            }
+            else
+            {
+                imageBase64 = Convert.ToBase64String(@book.Img as byte[]);
+                imageSrc = string.Format("data:image/jpeg;base64,{0}", imageBase64);
+            }
+            <form id="book-loan" method="post" asp-page-handler="admin">
+                <div class="row mt-4">
+                    <div class="col-lg-6">
+                        <div class="card" style="">
+                            <div class="row no-gutters">
+                                <div class="col-md-4"><img src="@imageSrc" class="card-img" alt="Book Cover"></div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@book.Title</h5>
+                                        <hr class="card-hr">
+                                        <p class="card-text">Author: @book.Author</p>
+                                        <input name="book-id" type="hidden" value="@book.Id" />                                       
+                                        <label for="reader-id">ID do leitor</label>
+                                        <input name="reader-id" type="text" placeholder="Indique o ID Leitor" required="" class="rounded-pill border shadow-sm px-4">
+                                        <label for="library">Disponível em:</label>
+                                        <select id="library" name="library" class="rounded-pil border-0 shadow-sm px-4">
+                                            @{
+                                                List<BibliotecaXPTO_Lib.Nucleo> nucleos = BibliotecaXPTO_Lib.Operations.ListaNucleosLivro(book.Id);
+
+                                                foreach (BibliotecaXPTO_Lib.Nucleo nucleo in nucleos)
+                                                {
+                                                    <option value="@nucleo.Id">@nucleo.City</option>
+                                                }
+                                            }
+                                        </select><br>
+                                        <input name="prm_post" type="hidden" value="10" />
+                                        <button type="submit" class="btn btn-primary">Requisitar</button>
+                                        @if (!string.IsNullOrEmpty(Model.ExceptionMessage) && Model.BookId == book.Id)
+                                        {<div class="alert alert-danger alert-dismissible">
+                                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                <span>@Model.ExceptionMessage</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.SuccessMessage) && Model.BookId == book.Id)
+                                        {<div class="alert alert-success alert-dismissible">
+                                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                <span>@Model.SuccessMessage</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        }
+    </div>
+}
+
+@if (Model.Prm == 2) /*Empréstimos Ativos e Devoluções*/
+{
+    <div class="container">
+        <div class="row justify-content-center" id="emprestimos">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Empréstimos Ativos</h1>
+                <h2>Consulte os empréstimos ativos e efetue devoluções.</h2>
+                <form id="book-history" method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>ID do Leitor</h5>
+                        <input id="reader-id" name="reader-id" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4 text-primary">
+                    </div>
+                    <input name="prm_post" type="hidden" value="2" />
+                    <button type="submit" class="btn btn-primary">Ver Empréstimos</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.IsPost == true && Model.Prm == 2)
+        {
+            @if (Model.Emprestimos.Count == 0)
+            {<div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Sem empréstimos ativos.</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                foreach (Object emprestimo in Model.Emprestimos)
+                {
+                    string imageBase64;
+                    string imageSrc;
+
+                    if ((emprestimo as List<Object>
+                        )[10] as byte[] == null)
+                    {
+                        imageSrc = "/images/cover-not-available.png";
+                    }
+                    else
+                    {
+                        imageBase64 = Convert.ToBase64String((emprestimo as List<Object>
+                            )[10] as byte[]);
+                        imageSrc = string.Format("data:image/jpeg;base64,{0}", imageBase64);
+                    }
+                    <form id="book-loan" method="post" asp-page-handler="admin">
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="card" style="">
+                                    <div class="row no-gutters">
+                                        <div class="col-md-4"><img src="@imageSrc" class="card-img"></div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title">@((emprestimo as List<Object>)[8])</h5>
+                                                <hr class="card-hr">
+                                                <p class="card-text">Autor: @((emprestimo as List<Object>)[9])</p>
+                                                <p class="card-text">Núcleo: @((emprestimo as List<Object>)[3]) </p>
+                                                <p class="card-text">ID do leitor: @Model.ReaderIdDevolver</p>
+                                                <input name="reader-id-devolver" type="hidden" value="@Model.ReaderIdDevolver">
+                                                <input name="library" type="hidden" value="@((emprestimo as List<Object>)[3])">
+                                                <input name="book-id" type="hidden" value="@((emprestimo as List<Object>)[2])">
+                                                <input name="prm_post" type="hidden" value="14">
+                                                <button type="submit" class="btn btn-primary">Devolver</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                }
+            }
+        }
+    </div>
+}
+
+@if (Model.Prm == 3) /*Status Empréstimo*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Status dos Empréstimos</h1>
+                <form id="book-history" method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>ID do Leitor</h5>
+                        <input id="reader-id" name="reader-id" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4 text-primary">
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Núcleo</h5>
+                        <select id="library" name="library" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                List<BibliotecaXPTO_Lib.Nucleo> nucleos = BibliotecaXPTO_Lib.Operations.ListaNucleos();
+
+                                foreach (BibliotecaXPTO_Lib.Nucleo nucleo in nucleos)
+                                {
+                                    <option value="@nucleo.Id">@nucleo.City</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <input name="prm_post" type="hidden" value="3" />
+                    <button type="submit" class="btn btn-primary">Ver Status</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.IsPost == true && Model.Prm == 3)
+        {
+            @if (Model.Status.Count == 0)
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Sem empréstimos ativos.</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <br />
+                <div class="row justify-content-center">
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Núcleo</th>
+                                <th scope="col">Obra</th>
+                                <th scope="col">Data Empréstimo</th>
+                                <th scope="col">Devolução Prevista</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        @foreach (Object stts in Model.Status)
+                        {
+                            <tbody>
+                                <tr>
+                                    <td>@((stts as List<Object>)[1])</td>
+                                    <td>@((stts as List<Object>)[2])</td>
+                                    <td>@((stts as List<Object>)[3])</td>
+                                    <td>@((stts as List<Object>)[4])</td>
+                                    <td>@((stts as List<Object>)[5])</td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+                </div>
+            }
+        }
+    </div>
+}
+
+@if (Model.Prm == 4) /*Histórico Empréstimo*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Histórico de Empréstimos</h1>
+                <form id="book-history" method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>ID do Leitor</h5>
+                        <input id="reader-id" name="reader-id" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4 text-primary">
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Núcleo</h5>
+                        <select id="library" name="library" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            <option value="-1" selected="selected">Inclua todos os núcleos ou selecione uma das opções.</option>
+                            @{
+                                List<BibliotecaXPTO_Lib.Nucleo> nucleos = BibliotecaXPTO_Lib.Operations.ListaNucleos();
+
+                                foreach (BibliotecaXPTO_Lib.Nucleo nucleo in nucleos)
+                                {
+                                    <option value="@nucleo.Id">@nucleo.City</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Data Inicial</h5>
+                        <input id="initial-date" name="initial-date" type="date" placeholder="Data Inicial" autofocus="" value="YYYY-MM-DD" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="final-date">Data Final</label>
+                        <input id="final-date" name="final-date" type="date" placeholder="Data Final" autofocus="" value="YYYY-MM-DD" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    <input name="prm_post" type="hidden" value="4" />
+                    <button type="submit" class="btn btn-primary">Ver Histórico</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.IsPost == true && Model.Prm == 4)
+        {
+            @if (Model.Historico.Count == 0)
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Ainda não fez nenhum empréstimo.</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <br />
+                <div class="row justify-content-center">
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">ID Empréstimo</th>
+                                <th scope="col">Núcleo</th>
+                                <th scope="col">Obra</th>
+                                <th scope="col">Data Empréstimo</th>
+                                <th scope="col">Data Devolução</th>
+                            </tr>
+                        </thead>
+                        @foreach (Object hst in Model.Historico)
+                        {
+                            <tbody>
+                                <tr>
+                                    <td>@((hst as List<Object>)[0])</td>
+                                    <td>@((hst as List<Object>)[3])</td>
+                                    <td>@((hst as List<Object>)[2])</td>
+                                    <td>@((hst as List<Object>)[4])</td>
+                                    <td>@((hst as List<Object>)[5])</td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+                </div>
+            }
+        }
+    </div>
+}
+
+@if (Model.Prm == 5) /*Cancelar Inscrição*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Cancelar Inscrição</h1>
+                <h2>Indique abaixo o ID do Leitor que deseja cancelar a inscrição.</h2>
+                <form method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>ID do Leitor</h5>
+                        <input id="reader-id" name="reader-id" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4 text-primary">
+                    </div>
+                    <input name="prm_post" type="hidden" value="5" />
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {<div class="alert alert-success alert-dismissible">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            <span><b>@Model.SuccessMessage<b></span>
+                        </div>
+                    }
+                    <button type="submit" class="btn btn-primary">Cancelar inscrição</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Prm == 7) /*Inserir Novas Obras*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Inserir Novas Obras</h1>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-group mb-3">
+                        <h5>ISBN</h5>
+                        <input id="isbn" name="isbn" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Título</h5>
+                        <input id="title" name="title" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Autor</h5>
+                        <input id="author" name="author" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Categoria</h5>
+                        <select id="category" name="category" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                foreach (Object categoria in BibliotecaXPTO_Lib.Operations.ListaCategorias())
+                                {
+                                    <option value="@((categoria as List<Object>)[0])">@((categoria as List<Object>)[1])</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Imagem Capa</h5>
+                        <input type="file" autofocus="" asp-for="Upload" class="form-control rounded-pill border-0 shadow-sm px-4" required=""><br />
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {<div class="alert alert-success alert-dismissible">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            <span><b>@Model.SuccessMessage<b></span>
+                        </div>
+                    }
+                    <input name="prm_post" type="hidden" value="7" />
+                    <button type="submit" class="btn btn-lg btn-primary">Inserir Obra</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Prm == 8) /*Atualizar Número de Exemplares*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Atualizar Número de Exemplares</h1>
+                <form method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>Título</h5>
+                        <select id="title" name="title" required="" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                foreach (BibliotecaXPTO_Lib.Book book in Model.Books)
+                                {
+                                    <option value="@book.Id">@book.Title</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Núcleo</h5>
+                        <select id="library" name="library" required="" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                List<BibliotecaXPTO_Lib.Nucleo> nucleos = BibliotecaXPTO_Lib.Operations.ListaNucleos();
+
+                                foreach (BibliotecaXPTO_Lib.Nucleo nucleo in nucleos)
+                                {
+                                    <option value="@nucleo.Id">@nucleo.City</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Quantidade</h5>
+                        <input id="qtty" name="qtty" type="number" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {<div class="alert alert-success alert-dismissible">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            <span><b>@Model.SuccessMessage<b></span>
+                        </div>
+                    }
+                    <input name="prm_post" type="hidden" value="8" />
+                    <button type="submit" class="btn btn-lg btn-primary">Atualizar Quantidade</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Prm == 9) /*Transferir Exemplares*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Transferir exemplares</h1>
+                <form method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>Título</h5>
+                        <select id="title" name="title" required="" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                foreach (BibliotecaXPTO_Lib.Book book in Model.Books)
+                                {
+                                    <option value="@book.Id">@book.Title</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Núcleo de Origem</h5>
+                        <select id="library-o" name="library-o" required="" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                List<BibliotecaXPTO_Lib.Nucleo> nucleosOrigem = BibliotecaXPTO_Lib.Operations.ListaNucleos(); ;
+
+                                foreach (BibliotecaXPTO_Lib.Nucleo nucleo in nucleosOrigem)
+                                {
+                                    <option value="@nucleo.Id">@nucleo.City</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Núcleo de Destino</h5>
+                        <select id="library-o" name="library-d" required="" class="form-control rounded-pil border-0 shadow-sm px-4">
+                            @{
+                                List<BibliotecaXPTO_Lib.Nucleo> nucleosDestino = BibliotecaXPTO_Lib.Operations.ListaNucleos(); ;
+
+                                foreach (BibliotecaXPTO_Lib.Nucleo nucleo in nucleosDestino)
+                                {
+                                    <option value="@nucleo.Id">@nucleo.City</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <h5>Quantidade</h5>
+                        <input id="qtty" name="qtty" type="number" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4">
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.ExceptionMessage))
+                    {<div class="alert alert-danger alert-dismissible">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            <span>@Model.ExceptionMessage</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {<div class="alert alert-success alert-dismissible">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            <span><b>@Model.SuccessMessage<b></span>
+                        </div>
+                    }
+                    <input name="prm_post" type="hidden" value="9" />
+                    <button type="submit" class="btn btn-lg btn-primary">Transferir Obra</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Prm == 11) /*Suspender Acesso*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Suspender Acesso</h1>
+                <form method="post" asp-page-handler="admin">
+                    <h5>Suspender o acesso de requisições a leitores que tenham procedido a devoluções atrasadas em mais que três ocasiões.</h5>
+                    <input name="prm_post" type="hidden" value="11" />
+                    <button type="submit" class="btn btn-lg btn-primary">Suspender Acesso</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.IsPost == true && Model.Prm == 11)
+        {
+            if (Model.Rows == 0)
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Nenhum leitor corresponde ao critério.</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Foi suspenso o acesso de <b>@Model.Rows</b> leitor(es).</h3>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+
+@if (Model.Prm == 12) /*Reativar Acesso*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Reativar Acesso</h1>
+                <h2>Reativar o acesso a um leitor suspenso.</h2>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <form method="post" asp-page-handler="admin">
+                    <div class="form-group mb-3">
+                        <h5>ID do Leitor</h5>
+                        <input id="reader-id" name="reader-id" type="text" required="" autofocus="" class="form-control rounded-pill border-0 shadow-sm px-4 text-primary">
+                    </div>
+                    <input name="prm_post" type="hidden" value="12" />
+                    <button type="submit" class="btn btn-primary">Reativar Acesso</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.IsPost == true && Model.Prm == 12)
+        {
+            if (Model.Name == "")
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Utilizador não encontrado.</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Foi reativado o acesso do(a) leitor(a) <b>@Model.Name</b>.</h3>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+
+@if (Model.Prm == 13) /*Eliminar Leitores (Inatividade)*/
+{
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Eliminar Leitores</h1>
+                <form method="post" asp-page-handler="admin">
+                    <h5>Eliminar leitores que estejam há mais de um ano sem fazer qualquer requisição.</h5>
+                    <input name="prm_post" type="hidden" value="13" />
+                    <button type="submit" class="btn btn-lg btn-primary">Eliminar Leitores</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.IsPost == true && Model.Prm == 13)
+        {
+            if (Model.Rows == 0)
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3>Nenhum leitor corresponde ao critério.</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <h3><b>@Model.Rows</b> leitor(es) eliminados.</h3>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
